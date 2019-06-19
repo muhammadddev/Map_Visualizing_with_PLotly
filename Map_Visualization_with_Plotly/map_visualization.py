@@ -1,5 +1,8 @@
 import json
 import copy
+
+import config
+
 import numpy as np
 import pandas as pd
 
@@ -67,8 +70,8 @@ def get_colorscale(sm, df, cmin, cmax):
     xrange = np.linspace(0, 1, len(df))
     values = np.linspace(cmin, cmax, len(df))
 
-    return [[i, 'rgba' + str(sm.to_rgba(v, bytes = True))] for i,v in zip(xrange, values) ]
 
+    return [[i, 'rgba' + str(sm.to_rgba(v, bytes = True))] for i,v in zip(xrange, values) ]
 def get_hover_text(df) :
     text_value = (df).astype(str) + ""
     with_data = '<b>{}</b> <br> {} Millions'
@@ -77,9 +80,6 @@ def get_hover_text(df) :
     return [with_data.format(p,v) if v != 'nan%' else no_data.format(p) for p,v in zip(df.index, text_value)]
 
 if __name__ == "__main__":
-
-
-    MAPBOX_APIKEY = "pk.eyJ1IjoibXVoYW1tYWRkZGV2IiwiYSI6ImNqd3o2NDVzaDExd2Y0OGp6NDJqZGU4YjEifQ.cc5l5wm4_1YQNaikhZwHVA"
 
     df = pd.read_csv("/home/muhammad/Envs/map_proj/code/Census_2016_Population_by_age_groups_and_sex.csv", index_col=0)
     df = df['Population']/1000000
