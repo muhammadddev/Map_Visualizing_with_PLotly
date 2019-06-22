@@ -78,6 +78,49 @@ def get_hover_text(df) :
 
     return [with_data.format(p,v) if v != 'nan%' else no_data.format(p) for p,v in zip(df.index, text_value)]
 
+def get_data_layout(df, sources, n_provinces, MAPBOX_APIKEY, sliders):
+
+    scatter_colors = df['marker']['color']
+
+    layers=([dict(sourcetype = 'geojson',
+                  source =sources[k],
+                  below="",
+                  type = 'line',    # the borders
+                  line = dict(width = 1),
+                  color = 'black',
+                  ) for k in range(n_provinces)
+              ] +
+
+            [dict(sourcetype = 'geojson',
+                  source =sources[k],
+                  below="water",
+                  type = 'fill',
+                  color = scatter_colors[k],
+                  opacity=0.8,
+                 ) for k in range(n_provinces)]
+             )
+
+    layout = dict(title="IRAN 2016 POPULATION",
+                  autosize=False,
+                  width=700,
+                  height=800,
+                  hovermode='closest',
+                  # hoverdistance = 30,
+
+                  mapbox=dict(accesstoken=MAPBOX_APIKEY,
+                              layers=layers,
+                              bearing=0,
+                              center=dict(
+                                        lat=35.715298,
+                                        lon=51.404343),
+                              pitch=0,
+                              zoom=4.9,
+                              style = 'dark'),
+                  sliders=sliders,
+                  )
+
+    return layout
+
 if __name__ == "__main__":
 
     df = pd.read_csv("/home/muhammad/Envs/map_proj/code/Map_Visualization_with_Plotly/Census_2016_Population_by_age_groups_and_sex (copy).csv", index_col=0)
@@ -144,36 +187,37 @@ if __name__ == "__main__":
 
         data_slider.append(data)
 
-    fill_list = []
-    for m in range(n_provinces):
-        for i in range(len(data_slider)):
-            fill_list.append(dict(sourcetype = 'geojson',
-                                    source =sources[m],
-                                    below="water",
-                                    type = 'fill',
-                                    color = scatter_color_list[i][m],
-                                    opacity=0.8,))
+    # print(data_slider[1]['marker']['color'])
 
-    layers=([dict(sourcetype = 'geojson',
-                  source =sources[k],
-                  below="",
-                  type = 'line',    # the borders
-                  line = dict(width = 1),
-                  color = 'black',
-                  ) for k in range(n_provinces)
-              ] +
-
-              fill_list
-            # [dict(sourcetype = 'geojson',
-            #       source =sources[k],
-            #       below="water",
-            #       type = 'fill',
-            #       color = scatter_colors[k],
-            #       opacity=0.8,
-            #      ) for k in range(n_provinces)
-             )
-
-
+    # # fill_list = []
+    # # for m in range(n_provinces):
+    # #     for i in range(len(data_slider)):
+    # #         fill_list.append(dict(sourcetype = 'geojson',
+    # #                                 source =sources[m],
+    # #                                 below="water",
+    # #                                 type = 'fill',
+    # #                                 color = scatter_color_list[i][m],
+    # #                                 opacity=0.8,))
+    #
+    #     # layers=([dict(sourcetype = 'geojson',
+    #     #               source =sources[k],
+    #     #               below="",
+    #     #               type = 'line',    # the borders
+    #     #               line = dict(width = 1),
+    #     #               color = 'black',
+    #     #               ) for k in range(n_provinces)
+    #     #           ] +
+    #     #           # fill_list
+    #     #         [dict(sourcetype = 'geojson',
+    #     #               source =sources[k],
+    #     #               below="water",
+    #     #               type = 'fill',
+    #     #               color = scatter_colors[k],
+    #     #               opacity=0.8,
+    #     #              ) for k in range(n_provinces)
+    #     #          )
+    #
+    #
 
     steps = []
     for i in range(len(data_slider)):
@@ -185,25 +229,25 @@ if __name__ == "__main__":
 
     sliders = [dict(active=0, steps=steps)]
 
-    layout = dict(title="IRAN 2016 POPULATION",
-                  autosize=False,
-                  width=700,
-                  height=800,
-                  hovermode='closest',
-                  # hoverdistance = 30,
-
-                  mapbox=dict(accesstoken=MAPBOX_APIKEY,
-                              layers=layers,
-                              bearing=0,
-                              center=dict(
-                                        lat=35.715298,
-                                        lon=51.404343),
-                              pitch=0,
-                              zoom=4.9,
-                              style = 'dark'),
-                  sliders=sliders,
-                  )
-
-    fig = dict(data=data_slider, layout=layout)
+    # layout = dict(title="IRAN 2016 POPULATION",
+    #               autosize=False,
+    #               width=700,
+    #               height=800,
+    #               hovermode='closest',
+    #               # hoverdistance = 30,
+    #
+    #               mapbox=dict(accesstoken=MAPBOX_APIKEY,
+    #                           layers=layers,
+    #                           bearing=0,
+    #                           center=dict(
+    #                                     lat=35.715298,
+    #                                     lon=51.404343),
+    #                           pitch=0,
+    #                           zoom=4.9,
+    #                           style = 'dark'),
+    #               sliders=sliders,
+    #               )
+    #
+    fig = dict(data=data_slider, layout=get_data_layout(data, sources, n_provinces, MAPBOX_APIKEY, sliders))
     py.plot(fig)
-    # print(len(scatter_color_list))
+    # # print(len(scatter_color_list))
