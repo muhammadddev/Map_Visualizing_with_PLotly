@@ -1,8 +1,6 @@
 import json
 import copy
 
-import config
-
 import numpy as np
 import pandas as pd
 
@@ -20,6 +18,7 @@ from matplotlib import cm
 from itertools import product
 from collections import Counter
 
+from config import *
 # print("everything already installed")
 
 def get_centers():
@@ -74,19 +73,18 @@ def get_colorscale(sm, df, cmin, cmax):
     return [[i, 'rgba' + str(sm.to_rgba(v, bytes = True))] for i,v in zip(xrange, values) ]
 def get_hover_text(df) :
     text_value = (df).astype(str) + ""
-    with_data = '<b>{}</b> <br> {} Millions'
+    with_data = '<b>{}</b> <br> {}'
     no_data = '<b>{}</b> <br> no data'
 
     return [with_data.format(p,v) if v != 'nan%' else no_data.format(p) for p,v in zip(df.index, text_value)]
 
 if __name__ == "__main__":
 
-    df = pd.read_csv("/home/muhammad/Envs/map_proj/code/Census_2016_Population_by_age_groups_and_sex.csv", index_col=0)
-    df = df['Population']/1000000
-    df.name = 'province'
-    # print(df.head(30))
+    df = pd.read_csv("/home/muhammad/Envs/map_proj/code/Map_Visualization_with_Plotly/Census_2016_Population_by_age_groups_and_sex (copy).csv", index_col=0)
+    columns = df.columns.tolist()
+    # print(columns)
 
-    with open('/home/muhammad/Envs/map_proj/code/iran_geo.json') as f:
+    with open('/home/muhammad/Envs/map_proj/code/Map_Visualization_with_Plotly/iran_geo.json') as f:
         geojson = json.load(f)
 
     n_provinces = len(geojson['features'])
@@ -97,42 +95,64 @@ if __name__ == "__main__":
     match_dict = match_regions(df.index, provinces_names)
     # print(match_dict)
 
-    df_tmp = df.copy()
-    df_tmp.index = df_tmp.index.map(match_dict)
-    df_tmp = df_tmp[~df_tmp.index.duplicated(keep=False)]
-
-    df_reindexed = df_tmp.reindex(index = provinces_names)
-
-    colormap = 'Blues'
-    cmin = df_reindexed.min()
-    cmax = df_reindexed.max()
-
     sources = make_sources()
     lons, lats = get_centers()
 
-    sm = scalarmappable(colormap, cmin, cmax)
-    scatter_colors = get_scatter_colors(sm, df_reindexed)
-    colorscale = get_colorscale(sm, df_reindexed, cmin, cmax)
-    hover_text = get_hover_text(df_reindexed)
+    data_slider = []
+    scatter_color_list = []
+    for age in columns[3:24]:
+        age_data = df[age]
+        age_data.name = 'province'
+        # print(age_data.head())
 
-    tickformat = ""
+        df_tmp = age_data.copy()
+        df_tmp.index = df_tmp.index.map(match_dict)
+        df_tmp = df_tmp[~df_tmp.index.duplicated(keep=False)]
 
-    data = dict(type='scattermapbox',
-                lat=lats,
-                lon=lons,
-                mode='markers',
-                text=hover_text,
-                marker=dict(size=1,
-                            color=scatter_colors,
-                            showscale = True,
-                            cmin = df_reindexed.min(),
-                            cmax = df_reindexed.max(),
-                            colorscale = colorscale,
-                            colorbar = dict(tickformat = tickformat)
-                           ),
-                showlegend=False,
-                hoverinfo='text'
-                 )
+        df_reindexed = df_tmp.reindex(index = provinces_names)
+
+        colormap = 'Blues'
+        cmin = df_reindexed.min()
+        cmax = df_reindexed.max()
+
+        sm = scalarmappable(colormap, cmin, cmax)
+        scatter_colors = get_scatter_colors(sm, df_reindexed)
+        colorscale = get_colorscale(sm, df_reindexed, cmin, cmax)
+        hover_text = get_hover_text(df_reindexed)
+
+        scatter_color_list.append(scatter_colors)
+
+        tickformat = ""
+
+        data = dict(type='scattermapbox',
+                    lat=lats,
+                    lon=lons,
+                    mode='markers',
+                    text=hover_text,
+                    marker=dict(size=20,
+                                color=scatter_colors,
+                                showscale = True,
+                                cmin = df_reindexed.min(),
+                                cmax = df_reindexed.max(),
+                                colorscale = colorscale,
+                                colorbar = dict(tickformat = tickformat)
+                               ),
+                    showlegend=False,
+                    hoverinfo='text'
+                    )
+
+
+        data_slider.append(data)
+
+    fill_list = []
+    for m in range(n_provinces):
+        for i in range(len(data_slider)):
+            fill_list.append(dict(sourcetype = 'geojson',
+                                    source =sources[m],
+                                    below="water",
+                                    type = 'fill',
+                                    color = scatter_color_list[i][m],
+                                    opacity=0.8,))
 
     layers=([dict(sourcetype = 'geojson',
                   source =sources[k],
@@ -143,17 +163,29 @@ if __name__ == "__main__":
                   ) for k in range(n_provinces)
               ] +
 
-            [dict(sourcetype = 'geojson',
-                  source =sources[k],
-                  below="water",
-                  type = 'fill',
-                  color = scatter_colors[k],
-                  opacity=1
-                 ) for k in range(n_provinces)
-             ]
-            )
+              fill_list
+            # [dict(sourcetype = 'geojson',
+            #       source =sources[k],
+            #       below="water",
+            #       type = 'fill',
+            #       color = scatter_colors[k],
+            #       opacity=0.8,
+            #      ) for k in range(n_provinces)
+             )
 
-    layout = go.Layout(title="IRAN 2016 POPULATION",
+
+
+    steps = []
+    for i in range(len(data_slider)):
+        step = dict(method='restyle',
+                    args=['visible', [False] * len(data_slider)],
+                    label='Age {}' .format(i))
+        step['args'][1][i] = True
+        steps.append(step)
+
+    sliders = [dict(active=0, steps=steps)]
+
+    layout = dict(title="IRAN 2016 POPULATION",
                   autosize=False,
                   width=700,
                   height=800,
@@ -168,9 +200,10 @@ if __name__ == "__main__":
                                         lon=51.404343),
                               pitch=0,
                               zoom=4.9,
-                              style = 'light'
-                              )
+                              style = 'dark'),
+                  sliders=sliders,
                   )
 
-    fig = dict(data=[data], layout=layout)
+    fig = dict(data=data_slider, layout=layout)
     py.plot(fig)
+    # print(len(scatter_color_list))
