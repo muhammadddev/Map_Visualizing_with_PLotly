@@ -10,6 +10,8 @@ import plotly.graph_objs as go
 import plotly.figure_factory as ff
 import cufflinks as cf
 
+from ipywidgets import widgets, interactive, VBox
+
 from fuzzywuzzy import fuzz, process
 
 from matplotlib.colors import Normalize
@@ -78,48 +80,55 @@ def get_hover_text(df) :
 
     return [with_data.format(p,v) if v != 'nan%' else no_data.format(p) for p,v in zip(df.index, text_value)]
 
-def get_data_layout(df, sources, n_provinces, MAPBOX_APIKEY, sliders):
+def get_data_layout(df):
 
-    scatter_colors = df['marker']['color']
+    sources = make_sources()
+    n_provinces = len(geojson['features'])
 
-    layers=([dict(sourcetype = 'geojson',
-                  source =sources[k],
-                  below="",
-                  type = 'line',    # the borders
-                  line = dict(width = 1),
-                  color = 'black',
-                  ) for k in range(n_provinces)
-              ] +
+    layouts = []
+    for i in range(len(data_slider)):
 
-            [dict(sourcetype = 'geojson',
-                  source =sources[k],
-                  below="water",
-                  type = 'fill',
-                  color = scatter_colors[k],
-                  opacity=0.8,
-                 ) for k in range(n_provinces)]
-             )
+        scatter_colors = df[i]['marker']['color']
 
-    layout = dict(title="IRAN 2016 POPULATION",
-                  autosize=False,
-                  width=700,
-                  height=800,
-                  hovermode='closest',
-                  # hoverdistance = 30,
+        layers=([dict(sourcetype = 'geojson',
+                      source =sources[k],
+                      below="",
+                      type = 'line',    # the borders
+                      line = dict(width = 1),
+                      color = 'black',
+                      ) for k in range(n_provinces)
+                  ] +
 
-                  mapbox=dict(accesstoken=MAPBOX_APIKEY,
-                              layers=layers,
-                              bearing=0,
-                              center=dict(
-                                        lat=35.715298,
-                                        lon=51.404343),
-                              pitch=0,
-                              zoom=4.9,
-                              style = 'dark'),
-                  sliders=sliders,
-                  )
+                [dict(sourcetype = 'geojson',
+                      source =sources[k],
+                      below="water",
+                      type = 'fill',
+                      color = scatter_colors[k],
+                      opacity=0.8,
+                     ) for k in range(n_provinces)]
+                 )
 
-    return layout
+        layout = dict(title="IRAN 2016 POPULATION",
+                      autosize=False,
+                      width=700,
+                      height=800,
+                      hovermode='closest',
+                      # hoverdistance = 30,
+
+                      mapbox=dict(accesstoken=MAPBOX_APIKEY,
+                                  layers=layers,
+                                  bearing=0,
+                                  center=dict(
+                                            lat=35.715298,
+                                            lon=51.404343),
+                                  pitch=0,
+                                  zoom=4.9,
+                                  style = 'dark'),
+                      # sliders=sliders,
+                      )
+        layouts.append(layout)
+
+    return layouts
 
 if __name__ == "__main__":
 
@@ -187,6 +196,10 @@ if __name__ == "__main__":
 
         data_slider.append(data)
 
+    layouts = get_data_layout(data_slider)
+
+
+
     # print(data_slider[1]['marker']['color'])
 
     # # fill_list = []
@@ -219,15 +232,15 @@ if __name__ == "__main__":
     #
     #
 
-    steps = []
-    for i in range(len(data_slider)):
-        step = dict(method='restyle',
-                    args=['visible', [False] * len(data_slider)],
-                    label='Age {}' .format(i))
-        step['args'][1][i] = True
-        steps.append(step)
-
-    sliders = [dict(active=0, steps=steps)]
+    # steps = []
+    # for i in range(len(data_slider)):
+    #     step = dict(method='restyle',
+    #                 args=['visible', [False] * len(data_slider)],
+    #                 label='Age {}' .format(i))
+    #     step['args'][1][i] = True
+    #     steps.append(step)
+    #
+    # sliders = [dict(active=0, steps=steps)]
 
     # layout = dict(title="IRAN 2016 POPULATION",
     #               autosize=False,
@@ -247,7 +260,23 @@ if __name__ == "__main__":
     #                           style = 'dark'),
     #               sliders=sliders,
     #               )
+
+    # l = get_data_layout(data_slider, sources, n_provinces, MAPBOX_APIKEY)
+    # fig = dict(data=data_slider, layout=l)
+    # py.plot(fig)
+
+    # f = go.FigureWidget(data=data_slider, layout=l)
+
+    # slider = widgets.IntSlider(min=0,
+    #                            max=20,
+    #                            step=1,
+    #                            description='year',
+    #                            orientation='horizontal',
+    #                            readout=True,
+    #                            readout_format='d')
     #
-    fig = dict(data=data_slider, layout=get_data_layout(data, sources, n_provinces, MAPBOX_APIKEY, sliders))
-    py.plot(fig)
-    # # print(len(scatter_color_list))
+    # freq_slider = interactive(get_data_layout, df=data, sources=sources, n_provinces=n_provinces, MAPBOX_APIKEY=MAPBOX_APIKEY)
+    #
+    # vb = VBox((f, freq_slider))
+    #
+    # print(vb)
