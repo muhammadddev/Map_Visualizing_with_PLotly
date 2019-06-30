@@ -9,6 +9,8 @@ import plotly.offline as py
 import plotly.graph_objs as go
 import plotly.figure_factory as ff
 
+from fuzzywuzzy import fuzz, process
+
 from matplotlib.colors import Normalize
 from matplotlib import cm
 
@@ -18,6 +20,7 @@ from collections import Counter
 from config import *
 
 # print("everything already installed")
+
 
 def get_centers():
     lon, lat = [], []
