@@ -103,11 +103,11 @@ def get_data_layout(df):
 
 if __name__ == "__main__":
 
-    df = pd.read_csv("/home/muhammad/Envs/map_proj/code/Map_Visualization_with_Plotly/Census_2016_Population_by_age_groups_and_sex (Edited).csv", index_col=0)
+    df = pd.read_csv("/home/muhammad/Envs/map_proj/code/Map_Visualization_with_Plotly/Interactive_Visualization/Census_2016_Population_by_age_groups_and_sex (Edited).csv", index_col=0)
     columns = df.columns.tolist()
     # print(columns[:3])
 
-    with open('/home/muhammad/Envs/map_proj/code/Map_Visualization_with_Plotly/iran_geo.json') as f:
+    with open('/home/muhammad/Envs/map_proj/code/Map_Visualization_with_Plotly/Interactive_Visualization/iran_geo.json') as f:
         geojson = json.load(f)
 
     n_provinces = len(geojson['features'])
