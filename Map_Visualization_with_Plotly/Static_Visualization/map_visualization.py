@@ -1,8 +1,6 @@
 import json
 import copy
 
-import config
-
 import numpy as np
 import pandas as pd
 
@@ -10,15 +8,14 @@ import plotly
 import plotly.offline as py
 import plotly.graph_objs as go
 import plotly.figure_factory as ff
-import cufflinks as cf
-
-from fuzzywuzzy import fuzz, process
 
 from matplotlib.colors import Normalize
 from matplotlib import cm
 
 from itertools import product
 from collections import Counter
+
+from config import *
 
 # print("everything already installed")
 
