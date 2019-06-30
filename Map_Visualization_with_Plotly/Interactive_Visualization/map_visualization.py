@@ -103,7 +103,7 @@ def get_data_layout(df):
 
 if __name__ == "__main__":
 
-    df = pd.read_csv("/home/muhammad/Envs/map_proj/code/Map_Visualization_with_Plotly/Census_2016_Population_by_age_groups_and_sex (copy).csv", index_col=0)
+    df = pd.read_csv("/home/muhammad/Envs/map_proj/code/Map_Visualization_with_Plotly/Census_2016_Population_by_age_groups_and_sex (Edited).csv", index_col=0)
     columns = df.columns.tolist()
     # print(columns[:3])
 
