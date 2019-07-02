@@ -58,9 +58,9 @@ def make_sources(): # TODO: if you want downsampling add downsample object for f
     return sources
 
 def scalarmappable(cmap, cmin, cmax):
-        colormap = cm.get_cmap(cmap)
-        norm = Normalize(vmin=cmin, vmax=cmax)
-        return cm.ScalarMappable(norm=norm, cmap=colormap)
+    colormap = cm.get_cmap(cmap)
+    norm = Normalize(vmin=cmin, vmax=cmax)
+    return cm.ScalarMappable(norm=norm, cmap=colormap)
 
 def get_scatter_colors(sm, df):
     grey = 'rgba(128,128,128,1)'
@@ -70,8 +70,8 @@ def get_colorscale(sm, df, cmin, cmax):
     xrange = np.linspace(0, 1, len(df))
     values = np.linspace(cmin, cmax, len(df))
 
-
     return [[i, 'rgba' + str(sm.to_rgba(v, bytes = True))] for i,v in zip(xrange, values) ]
+
 def get_hover_text(df) :
     text_value = (df).astype(str) + ""
     with_data = '<b>{}</b> <br> {} Millions'
