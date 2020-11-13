@@ -39,7 +39,13 @@ def get_centers():
     return lon, lat
 
 def match_regions(list1, list2):
-    matched = [process.extract(list1[i], list2, limit=1, scorer = fuzz.partial_ratio)[0][0] for i in range(0, len(list1))]
+    matched = [
+        process.extract(list1[i], list2, limit=1, scorer=fuzz.partial_ratio)[
+            0
+        ][0]
+        for i in range(len(list1))
+    ]
+
     return {key: value for (key, value) in zip(list1, matched)}
 
 
