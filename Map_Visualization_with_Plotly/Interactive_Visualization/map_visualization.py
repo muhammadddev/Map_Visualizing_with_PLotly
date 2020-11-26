@@ -38,18 +38,23 @@ def get_centers():
     return lon, lat
 
 def match_regions(list1, list2):
-    matched = [process.extract(list1[i], list2, limit=1, scorer = fuzz.partial_ratio)[0][0] for i in range(0, len(list1))]
+    matched = [
+        process.extract(list1[i], list2, limit=1, scorer=fuzz.partial_ratio)[
+            0
+        ][0]
+        for i in range(len(list1))
+    ]
+
     return {key: value for (key, value) in zip(list1, matched)}
 
 
 def make_sources():
-    sources = []
     geojson_copy = copy.deepcopy(geojson['features'])
 
-    for feature in geojson_copy:
-        sources.append(dict(type = 'FeatureCollection', features = [feature]))
-
-    return sources
+    return [
+        dict(type='FeatureCollection', features=[feature])
+        for feature in geojson_copy
+    ]
 
 def scalarmappable(cmap, cmin, cmax):
     colormap = cm.get_cmap(cmap)
